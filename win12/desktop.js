@@ -1,14 +1,13 @@
-let updated = false, aftload = false;
-// 列表点击
-let lists = document.querySelectorAll('list>a,#cs>list>a');
+// 列表点击 + 边框发光
+let lists = document.querySelectorAll(`#s-m-l>list>a,#win-setting>.menu>list>a`);
 lists.forEach(la => {
     la.addEventListener('mousemove', (e) => {
         x = e.clientX - $(la).offset()['left'];
         y = e.clientY - $(la).offset()['top'];
-        $(la).css('cssText', `background:radial-gradient(circle at ${x}px ${y}px,var(--hover) 10%, #00000000);`)
+        $(la).css('cssText', `background:radial-gradient(circle at ${x}px ${y}px,var(--hover) 20px, #00000000) center;background-size:110% 100%;border-image:radial-gradient(circle at ${x}px ${y}px,var(--hover) 20px, #00000000 40px) 2;`)
     });
     la.addEventListener('mouseout', () => {
-        $(la).css('cssText', `background:radial-gradient(#00000000,#00000000);`)
+        $(la).css('cssText', `background-image:radial-gradient(#00000000,#00000000),radial-gradient(#00000000,#00000000);`)
     });
 });
 // 禁止拖拽图片
@@ -27,37 +26,52 @@ $('input,textarea').on('contextmenu', (e) => {
 let cms = {
     'titbar': [
         function (arg) {
-            if (arg == 'calc')
-                return 'null'
-            if ($('.window.' + arg).hasClass("max"))
+            if (arg == 'calc' || arg == 'notepad-fonts') {
+                return 'null';
+            }
+            if ($('.window.' + arg).hasClass("max")) {
                 return ['<i class="bi bi-window-stack"></i> 还原', `maxwin('${arg}')`];
-            else
+            }
+            else {
                 return ['<i class="bi bi-window-fullscreen"></i> 最大化', `maxwin('${arg}')`];
+            }
         },
         function (arg) {
-            return ['<i class="bi bi-window-dash"></i> 最小化', `minwin('${arg}')`];
+            if (arg == 'notepad-fonts') {
+                return 'null';
+            }
+            else {
+                return ['<i class="bi bi-window-dash"></i> 最小化', `minwin('${arg}')`];
+            }
         },
         function (arg) {
-            return ['<i class="bi bi-window-x"></i> 关闭', `hidewin('${arg}')`];
+            if (arg == 'notepad-fonts') {
+                return ['<i class="bi bi-window-x"></i> 关闭', `hidewin('${arg}', 'configs')`];
+            }
+            else {
+                return ['<i class="bi bi-window-x"></i> 关闭', `hidewin('${arg}')`];
+            }
         },
     ],
     'desktop': [
         ['<i class="bi bi-arrow-clockwise"></i> 刷新', `$('#desktop').css('opacity','0');setTimeout(()=>{$('#desktop').css('opacity','1');},100);`],
         ['<i class="bi bi-circle-square"></i> 切换主题', 'toggletheme()'],
-        ['<i class="bi bi-github"></i> 在 Github 中查看此项目', `window.open('https://github.com/tjy-gitnub/win12','_blank');`],
-        ['<i class="bi bi-chat-left-text"></i> 发送反馈', `window.open('https://github.com/tjy-gitnub/win12/issues','_blank');`],
+        `<a onmousedown="window.open('https://github.com/tjy-gitnub/win12','_blank');" title="https://github.com/tjy-gitnub/win12"><i class="bi bi-github"></i> 在 Github 中查看此项目</a>`,
+        `<a onmousedown="window.open('https://github.com/tjy-gitnub/win12/issues','_blank');" title="https://github.com/tjy-gitnub/win12/issues"><i class="bi bi-chat-left-text"></i> 发送反馈</a>`,
         ['<i class="bi bi-info-circle"></i> 关于 Win12 网页版', `$('#win-about>.about').show(200);$('#win-about>.update').hide();openapp('about');if($('.window.about').hasClass('min'))minwin('about');`],
     ],
     'winx': [
         function (arg) {
-            if ($('#start-menu').hasClass("show"))
+            if ($('#start-menu').hasClass("show")) {
                 return ['<i class="bi bi-box-arrow-in-down"></i> 关闭开始菜单', `hide_startmenu()`];
-            else
+            }
+            else {
                 return ['<i class="bi bi-box-arrow-in-up"></i> 打开开始菜单', `$('#start-btn').addClass('show');
                 if($('#search-win').hasClass('show')){$('#search-btn').removeClass('show');
                 $('#search-win').removeClass('show');setTimeout(() => {$('#search-win').removeClass('show-begin');
                 }, 200);}$('#start-menu').addClass('show-begin');setTimeout(() => {$('#start-menu').addClass('show');
                 }, 0);`];
+            }
         },
         '<hr>',
         ['<i class="bi bi-gear"></i> 设置', `openapp('setting')`],
@@ -74,15 +88,17 @@ let cms = {
             return ['<i class="bi bi-window"></i> 打开', `openapp('${arg[0]}');hide_startmenu();`];
         },
         function (arg) {
-            return ['<i class="bi bi-link-45deg"></i> 在桌面创建链接', "$('#desktop').append(`<div class='b' ondblclick=openapp('" + arg[0] + "')><img src='icon/" + arg[0] + ".png'><p>" + arg[1] + "</p></div>`)"];
+            return ['<i class="bi bi-link-45deg"></i> 在桌面创建链接', "$('#desktop').append(`<div class='b' ondblclick=openapp('" + arg[0] + "')  ontouchstart=openapp('" + arg[0] + "')><img src='icon/" + arg[0] + ".png'><p>" + arg[1] + "</p></div>`)"];
         }
     ],
     'dockabout': [
         function (arg) {
-            if (arg)
+            if (arg) {
                 return ['<i class="bi bi-arrow-bar-down"></i> 收起', `$('.dock.about').removeClass('show')`];
-            else
+            }
+            else {
                 return ['<i class="bi bi-arrow-bar-up"></i> 展开', `$('.dock.about').addClass('show')`];
+            }
         },
         ['<i class="bi bi-info-circle"></i> 更多信息', `$('#win-about>.about').show(200);$('#win-about>.update').hide();
         openapp('about');if($('.window.about').hasClass('min'))minwin('about');`]
@@ -142,7 +158,9 @@ function showcm(e, cl, arg) {
     cms[cl].forEach(item => {
         if (typeof (item) == 'function') {
             ret = item(arg);
-            if (ret == 'null') return true;
+            if (ret == 'null') {
+                return true;
+            }
             h += `<a class="a" onmousedown="${ret[1]}">${ret[0]}</a>\n`;
         } else if (typeof (item) == 'string') {
             h += item + '\n';
@@ -176,29 +194,33 @@ $('#cm>.foc').blur(() => {
 // 下拉菜单
 dps = {
     'notepad.file': [
-        ['<i class="bi bi-file-earmark-plus"></i> 新建', `hidedp();$('#win-notepad>.text-box').addClass('down');
+        ['<i class="bi bi-file-earmark-plus"></i> 新建', `hidedp(true);$('#win-notepad>.text-box').addClass('down');
         setTimeout(()=>{$('#win-notepad>.text-box').val('');$('#win-notepad>.text-box').removeClass('down')},200);`],
-        ['<i class="bi bi-box-arrow-right"></i> 另存为', `hidedp();$('#win-notepad>.save').attr('href','data:text/txt;,'+encodeURIComponent($('#win-notepad>.text-box').val()));
+        ['<i class="bi bi-box-arrow-right"></i> 另存为', `hidedp(true);$('#win-notepad>.save').attr('href', window.URL.createObjectURL(new Blob([$('#win-notepad>.text-box').val()])));
         $('#win-notepad>.save')[0].click();`],
         '<hr>',
-        ['<i class="bi bi-x"></i> 退出', `hidedp();hidewin('notepad')`],
+        ['<i class="bi bi-x"></i> 退出', `isOnDp=false;hidedp(true);hidewin('notepad')`],
     ],
     'notepad.edit': [
-        ['<i class="bi bi-files"></i> 复制 <info>Ctrl+C</info>', ''],
-        ['<i class="bi bi-clipboard"></i> 粘贴 <info>Ctrl+V</info>', ''],
-        ['<i class="bi bi-scissors"></i> 剪切 <info>Ctrl+X</info>', ''],
+        ['<i class="bi bi-files"></i> 复制 <info>Ctrl+C</info>', 'document.execCommand(\'copy\')'],
+        ['<i class="bi bi-clipboard"></i> 粘贴 <info>Ctrl+V</info>', `document.execCommand(\'paste\')`],
+        ['<i class="bi bi-scissors"></i> 剪切 <info>Ctrl+X</info>', 'document.execCommand(\'cut\')'],
         '<hr>',
-        ['<i class="bi bi-arrow-return-left"></i> 撤销 <info>Ctrl+Z</info>', ''],
-        ['<i class="bi bi-arrow-clockwise"></i> 重做 <info>Ctrl+Y</info>', ''],
+        ['<i class="bi bi-arrow-return-left"></i> 撤销 <info>Ctrl+Z</info>', 'document.execCommand(\'undo\')'],
+        ['<i class="bi bi-arrow-clockwise"></i> 重做 <info>Ctrl+Y</info>', 'document.execCommand(\'redo\')'],
+    ],
+    'notepad.view': [
+        ['<i class="bi bi-fonts"></i> 字体 ', 'hidedp(true);showwin(\'notepad-fonts\');resetfonts();']
     ]
 }
-dpt = null;
+let dpt = null, isOnDp = false;
+$('#dp')[0].onmouseover = () => { isOnDp = true };
+$('#dp')[0].onmouseleave = () => { isOnDp = false; hidedp() };
 function showdp(e, cl, arg) {
     if ($('#dp').hasClass('show-begin')) {
         $('#dp').removeClass('show');
         setTimeout(() => {
             $('#dp').removeClass('show-begin');
-            $(dpt).removeClass('showdp');
         }, 200);
         if (e != dpt) {
             setTimeout(() => {
@@ -207,8 +229,7 @@ function showdp(e, cl, arg) {
         }
         return;
     }
-    dpt = e;
-    $(e).addClass('showdp');
+    // dpt = e;
     let off = $(e).offset();
     $('#dp').css('left', off.left);
     $('#dp').css('top', off.top + e.offsetHeight);
@@ -216,12 +237,14 @@ function showdp(e, cl, arg) {
     dps[cl].forEach(item => {
         if (typeof (item) == 'function') {
             ret = item(arg);
-            if (ret == 'null') return true;
-            h += `<a class="a" onmousedown="${ret[1]}">${ret[0]}</a>\n`;
+            if (ret == 'null') {
+                return true;
+            }
+            h += `<a class="a" onclick="${ret[1]}">${ret[0]}</a>\n`;
         } else if (typeof (item) == 'string') {
             h += item + '\n';
         } else {
-            h += `<a class="a" onmousedown="${item[1]}">${item[0]}</a>\n`;
+            h += `<a class="a" onclick="${item[1]}">${item[0]}</a>\n`;
         }
     })
     $('#dp>list')[0].innerHTML = h;
@@ -238,17 +261,29 @@ function showdp(e, cl, arg) {
         }
     }, 200);
 }
-function hidedp() {
-    $('#dp').removeClass('show');
+function hidedp(force = false) {
     setTimeout(() => {
-        $('#dp').removeClass('show-begin');
-    }, 200);
-    $(dpt).css('background-color', 'unset');
+        if (isOnDp && !force) {
+            return;
+        }
+        $('#dp').removeClass('show');
+        setTimeout(() => {
+            $('#dp').removeClass('show-begin');
+        }, 200);
+    }, 100);
 }
 // 应用
 let apps = {
     setting: {
-        init: () => { }
+        init: () => { },
+        page:(name)=>{
+            $('#win-setting>.page>.cnt.'+name).scrollTop(0);
+            $('#win-setting>.page>.cnt.show').removeClass('show');
+            $('#win-setting>.page>.cnt.'+name).addClass('show');
+            $('#win-setting>.menu>list>a.check').removeClass('check');
+            $('#win-setting>.menu>list>a.'+name).addClass('check');
+            
+        }
     },
     explorer: {
         init: () => {
@@ -259,20 +294,20 @@ let apps = {
             #win-explorer>.main>.content>.view>.class>img{width: 20px;height: 20px;margin-top: 3px;margin-right: 5px;filter:brightness(0.9);}
             #win-explorer>.main>.content>.view>.group{display: flex;flex-wrap: wrap;padding: 10px 20px;}
             #win-explorer>.main>.content>.view>.group>.item{width: 280px;margin: 5px;height:  80px;
-                background: radial-gradient(circle, var(--card),var(--card));border-radius: 10px;transition: 100ms;display: flex;}
+                background: radial-gradient(circle, var(--card),var(--card));border-radius: 10px;display: flex;}
             #win-explorer>.main>.content>.view>.group>.item:hover{background-color: var(--hover);}
             #win-explorer>.main>.content>.view>.group>.item>img{width: 55px;height: 55px;margin-top: 18px;margin-left: 10px;}
             #win-explorer>.main>.content>.view>.group>.item>div{flex-grow: 1;padding: 5px 5px 0 0;}
             #win-explorer>.main>.content>.view>.group>.item>div>.bar{width: calc(100% - 10px);height: 8px;border-radius: 10px;
                 background-color: var(--hover-b);margin: 5px 5px;}
-            #win-explorer>.main>.content>.view>.group>.item>div>.bar>.content{height: 100%;background-image: linear-gradient(90deg, #ad6eca, #4998d9);
+            #win-explorer>.main>.content>.view>.group>.item>div>.bar>.content{height: 100%;background-image: linear-gradient(90deg, var(--theme-1), var(--theme-2));
                 border-radius: 10px;}
             #win-explorer>.main>.content>.view>.group>.item>div>.info{color: #959595;font-size: 14px;}</style>
             <p class="class"><img src="apps/icons/explorer/disk.png"> 设备和驱动器</p><div class="group">
-            <a class="a item" ondblclick="apps.explorer.goto('C:')" oncontextmenu="stop(event);return showcm(event,'explorer.folder','C:')">
+            <a class="a item act" ondblclick="apps.explorer.goto('C:')" ontouchend="apps.explorer.goto('C:')" oncontextmenu="stop(event);return showcm(event,'explorer.folder','C:')">
             <img src="apps/icons/explorer/diskwin.png"><div><p class="name">本地磁盘 (C:)</p>
             <div class="bar"><div class="content" style="width: 88%;"></div>
-            </div><p class="info">32.6 GB 可用, 共 143 GB</p></div></a><a class="a item" ondblclick="apps.explorer.goto('D:')"
+            </div><p class="info">32.6 GB 可用, 共 143 GB</p></div></a><a class="a item act" ondblclick="apps.explorer.goto('D:')" ontouchend="apps.explorer.goto('D:')"
             oncontextmenu="stop(event);return showcm(event,'explorer.folder','D:')">
             <img src="apps/icons/explorer/disk.png"><div><p class="name">本地磁盘 (D:)</p><div class="bar"><div class="content" style="width: 15%;"></div>
             </div><p class="info">185.3 GB 可用, 共 216 GB</p></div></a></div>`;
@@ -290,7 +325,7 @@ let apps = {
             } else {
                 let ht = '';
                 for (folder in tmp) {
-                    ht += `<a class="a item" ondblclick="apps.explorer.goto('${path}/${folder}')" oncontextmenu="stop(event);return showcm(event,'explorer.folder','${path}/${folder}')">
+                    ht += `<a class="a item" ondblclick="apps.explorer.goto('${path}/${folder}')" ontouchend="apps.explorer.goto('${path}/${folder}')" oncontextmenu="stop(event);return showcm(event,'explorer.folder','${path}/${folder}')">
                         <img src="apps/icons/explorer/folder.png">${folder}</a>`;
                 }
                 $('#win-explorer>.main>.content>.view')[0].innerHTML = ht;
@@ -325,6 +360,9 @@ let apps = {
     calc: {
         init: () => {
             $('#calc-input').val('');
+        },
+        add: (arg) => {
+            $('#calc-input')[0].value += arg;
         }
     },
     about: {
@@ -340,6 +378,30 @@ let apps = {
                 $('#win-notepad>.text-box').val('');
                 $('#win-notepad>.text-box').removeClass('down')
             }, 200);
+        }
+    },
+    terminal: {
+        init: () => { }
+    }
+}
+
+
+// 小组件
+let widgets = {
+    widgets: {
+        add: (arg) => {
+            if ($('#widgets>.widgets>.content>.grid>.wg.' + arg).length != 0) {
+                return;
+            }
+            $('#widgets>.widgets>.content>.grid')[0].innerHTML += $('#widgets>.widgets>.content>.template>.' + arg).html();
+        },
+        remove: (arg) => {
+            $('#widgets>.widgets>.content>.grid>.wg.' + arg).remove();
+        }
+    },
+    calc: {
+        add: (arg) => {
+            $('*:not(.template)>*>.wg.calc>.content>input')[0].value += arg;
         }
     }
 }
@@ -374,12 +436,18 @@ for (let i = 1; i <= daysum; i++) {
     $('#datebox>.cont>.body')[0].innerHTML += `<p>${i}</p>`;
 }
 function openapp(name) {
-    if ($('#taskbar>.' + name).length != 0) return;
+    // focwin(name); 这里会添加2个窗口，因为我在 line 457 加了foc的内容
+    if ($('#taskbar>.' + name).length != 0) {
+        return;
+    }
     $('.window.' + name).addClass('load');
     showwin(name);
     $('#taskbar').attr('count', Number($('#taskbar').attr('count')) + 1)
-    $('#taskbar').html(`${$('#taskbar').html()}<a class="${name}" onclick="minwin(\'${name}\')"><img src="icon/${name}.png"></a>`);
-    if ($('#taskbar').attr('count') == '1') $('#taskbar').css('display', 'flex');
+    $('#taskbar').html(`${$('#taskbar').html()}<a class="${name}" onclick="taskbarclick(\'${name}\')"><img src="icon/${name}.png"></a>`);
+    if ($('#taskbar').attr('count') == '1') {
+        $('#taskbar').css('display', 'flex');
+    }
+    $('#taskbar>.'+name).addClass('foc');
     setTimeout(() => {
         $('#taskbar').css('width', 10 + $('#taskbar').attr('count') * 34);
     }, 0);
@@ -387,7 +455,6 @@ function openapp(name) {
     setTimeout(() => {
         $('.window.' + name).removeClass('load');
     }, 1000);
-
 }
 // 窗口操作
 function showwin(name) {
@@ -395,59 +462,136 @@ function showwin(name) {
     setTimeout(() => { $('.window.' + name).addClass('show'); }, 0);
     setTimeout(() => { $('.window.' + name).addClass('notrans'); }, 200);
     $('.window.' + name).attr('style', `top: 10%;left: 15%;`);
+    $('#taskbar>.'+wo[0]).removeClass('foc');
+    $('.window.' + wo[0]).removeClass('foc');
+    wo.splice(0, 0, name);
+    orderwindow();
+    $('.window.' + name).addClass('foc');
 }
-function hidewin(name) {
+function hidewin(name, arg = 'window') {
     $('.window.' + name).removeClass('notrans');
     $('.window.' + name).removeClass('max');
     $('.window.' + name).removeClass('show');
-    $('#taskbar').attr('count', Number($('#taskbar').attr('count')) - 1)
-    $('#taskbar>.' + name).remove();
-    $('#taskbar').css('width', 10 + $('#taskbar').attr('count') * 34);
-    setTimeout(() => {
-
-        if ($('#taskbar').attr('count') == '0') $('#taskbar').css('display', 'none');
-    }, 80);
+    if (arg == 'window') {
+        $('#taskbar').attr('count', Number($('#taskbar').attr('count')) - 1)
+        $('#taskbar>.' + name).remove();
+        $('#taskbar').css('width', 10 + $('#taskbar').attr('count') * 34);
+        setTimeout(() => {
+            if ($('#taskbar').attr('count') == '0') {
+                $('#taskbar').css('display', 'none');
+            }
+        }, 80);
+    }
     setTimeout(() => { $('.window.' + name).removeClass('show-begin'); }, 200);
     $('.window.' + name + '>.titbar>div>.wbtg.max').html('<i class="bi bi-app"></i>');
+    if ($('.window').hasClass('max') == false) {
+        $('#dock-box').removeClass('hide');
+    }
+    wo.splice(wo.indexOf('name'),1);
+    orderwindow();
 }
-function maxwin(name) {
+function maxwin(name, trigger = true) {
     if ($('.window.' + name).hasClass('max')) {
         $('.window.' + name).removeClass('max');
         $('.window.' + name + '>.titbar>div>.wbtg.max').html('<i class="bi bi-app"></i>');
-        setTimeout(() => { $('.window.' + name).addClass('notrans'); }, 200);
-        $('.window.' + name).attr('style', `top: 10%;left: 15%;`);
+        if (trigger) {
+            setTimeout(() => { $('.window.' + name).addClass('notrans'); }, 200);
+        } else if (!trigger) {
+            $('.window.' + name).addClass('notrans');
+        }
+        if ($('.window.' + name).attr('data-pos-x') != 'null' && $('.window.' + name).attr('data-pos-y') != 'null') {
+            $('.window.' + name).attr(`style`, `left:${$('.window.' + name).attr('data-pos-x')};top:${$('.window.' + name).attr('data-pos-y')}`);
+        }
+        if ($('.window').hasClass('max') == false) {
+            $('#dock-box').removeClass('hide');
+        }
     } else {
+        if (trigger) {
+            $('.window.' + name).attr('data-pos-x', `${window.getComputedStyle(document.querySelector('.window.' + name), null).getPropertyValue('left')}`);
+            $('.window.' + name).attr('data-pos-y', `${window.getComputedStyle(document.querySelector('.window.' + name), null).getPropertyValue('top')}`);
+        }
         $('.window.' + name).removeClass('notrans');
         $('.window.' + name).addClass('max');
         $('.window.' + name + '>.titbar>div>.wbtg.max').html('<svg version="1.1" width="12" height="12" viewBox="0,0,37.65105,35.84556" style="margin-top:4px;"><g transform="translate(-221.17804,-161.33903)"><g style="stroke:var(--text);" data-paper-data="{&quot;isPaintingLayer&quot;:true}" fill="none" fill-rule="nonzero" stroke-width="2" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" style="mix-blend-mode: normal"><path d="M224.68734,195.6846c-2.07955,-2.10903 -2.00902,-6.3576 -2.00902,-6.3576l0,-13.72831c0,0 -0.23986,-1.64534 2.00902,-4.69202c1.97975,-2.68208 4.91067,-2.00902 4.91067,-2.00902h14.06315c0,0 3.77086,-0.23314 5.80411,1.67418c2.03325,1.90732 1.33935,5.02685 1.33935,5.02685v13.39347c0,0 0.74377,4.01543 -1.33935,6.3576c-2.08312,2.34217 -5.80411,1.67418 -5.80411,1.67418h-13.39347c0,0 -3.50079,0.76968 -5.58035,-1.33935z"/><path d="M229.7952,162.85325h16.06111c0,0 5.96092,-0.36854 9.17505,2.64653c3.21412,3.01506 2.11723,7.94638 2.11723,7.94638v18.55642"/></g></g></svg>')
+        $('#dock-box').addClass('hide');
     }
 }
 function minwin(name) {
     if ($('.window.' + name).hasClass('min')) {
         $('.window.' + name).addClass('show-begin');
+        focwin(name);
         setTimeout(() => {
             $('#taskbar>.' + name).removeClass('min');
             $('.window.' + name).removeClass('min');
-            if ($('.window.' + name).hasClass('min-max')) $('.window.' + name).addClass('max');
+            if ($('.window.' + name).hasClass('min-max')) {
+                $('.window.' + name).addClass('max');
+            }
             $('.window.' + name).removeClass('min-max');
         }, 0);
         setTimeout(() => {
-            if (!$('.window.' + name).hasClass('max')) $('.window.' + name).addClass('notrans');
+            if (!$('.window.' + name).hasClass('max')) {
+                $('.window.' + name).addClass('notrans');
+            }
+            if ($('.window').hasClass('max')) {
+                $('#dock-box').addClass('hide');
+            }
         }, 200);
     } else {
-        if ($('.window.' + name).hasClass('max')) $('.window.' + name).addClass('min-max');
+        focwin(null);
+        if ($('.window.' + name).hasClass('max')) {
+            $('.window.' + name).addClass('min-max');
+        }
         $('.window.' + name).removeClass('max');
         $('#taskbar>.' + name).addClass('min');
         $('.window.' + name).addClass('min');
         $('.window.' + name).removeClass('notrans');
         setTimeout(() => { $('.window.' + name).removeClass('show-begin'); }, 200);
+        if (!$('.window').hasClass('max')) {
+            $('#dock-box').removeClass('hide');
+        }
     }
 }
-// 开始菜单
+let wo = [];
+function orderwindow() {
+    for (let i = 0; i < wo.length; i++) {
+        const win = $('.window.' + wo[wo.length - i - 1]);
+        win.css('z-index', 10 + i);
+    }
+}
+// 以下函数基于bug运行，切勿改动！
+function focwin(name,arg='window') {
+    // if(wo[0]==name)return;
+    if(arg=='window'){
+        $('#taskbar>.'+wo[0]).removeClass('foc');
+        $('#taskbar>.'+name).addClass('foc');
+    }
+    $('.window.' + wo[0]).removeClass('foc');
+    wo.splice(wo.indexOf(name), 1);
+    wo.splice(0, 0, name);
+    orderwindow();
+    $('.window.' + name).addClass('foc');
+}
+function taskbarclick(name){
+    if($('.window.'+name).hasClass('foc')){
+        minwin(name);
+        focwin(null); // 禁改
+        return;
+    }
+    if($('.window.'+name).hasClass('min')){
+        minwin(name);
+    }
+    focwin(name);
+}
+// 菜单隐藏
 function hide_startmenu() {
     $('#start-menu').removeClass('show');
     $('#start-btn').removeClass('show');
     setTimeout(() => { $('#start-menu').removeClass('show-begin'); }, 200);
+}
+function hide_widgets() {
+    $('#widgets').removeClass('show');
+    $('#widgets-btn').removeClass('show');
+    setTimeout(() => { $('#widgets').removeClass('show-begin'); }, 200);
 }
 // 主题
 function toggletheme() {
@@ -458,19 +602,25 @@ function toggletheme() {
 const page = document.getElementsByTagName('html')[0];
 const titbars = document.querySelectorAll('.window>.titbar');
 const wins = document.querySelectorAll('.window');
-let deltaLeft = 0, deltaTop = 0, fil = false;
+let deltaLeft = 0, deltaTop = 0, fil = false, bfLeft = 0, bfTop = 0;
 for (let i = 0; i < wins.length; i++) {
     const win = wins[i];
     const titbar = titbars[i];
     function win_move(e) {
-        if (e.clientY - deltaTop < 0) {
-            win.setAttribute('style', `left:${e.clientX - deltaLeft}px;top:0px`);
-            if (win.classList[1] != 'calc') {
+        let cx, cy;
+        if (e.type == 'touchmove') {
+            cx = e.targetTouches[0].clientX, cy = e.targetTouches[0].clientY;
+        } else {
+            cx = e.clientX, cy = e.clientY;
+        }
+        if (cy - deltaTop < 0) {
+            this.setAttribute('style', `left:${cx - deltaLeft}px;top:0px`);
+            if (this.classList[1] != 'calc' && this.classList[1] != 'notepad-fonts') {
                 $('#window-fill').addClass('top');
                 setTimeout(() => {
                     $('#window-fill').addClass('fill');
                 }, 0);
-                fil = win;
+                fil = this;
             }
         } else if (fil) {
             $('#window-fill').removeClass('fill');
@@ -478,29 +628,191 @@ for (let i = 0; i < wins.length; i++) {
                 $('#window-fill').removeClass('top');
             }, 200);
             fil = false;
+        } else if ($(this).hasClass('max')) {
+            // setTimeout(() => {
+            // if(!$(this).hasClass('max'))return;
+            maxwin(this.classList[1], false);
+            deltaLeft = deltaLeft / (document.body.offsetWidth - (45 * 3)) * (0.7 * document.body.offsetWidth - 45 * 3);
+            // 窗口控制按钮宽 45px
+            this.setAttribute('style', `left:${cx - deltaLeft}px;top:${cy - deltaTop}px;`);
+            $('.window.' + this.classList[1] + '>.titbar>div>.wbtg.max').html('<i class="bi bi-app"></i>');
+            if (!$('.window').hasClass('max')) {
+                $('#dock-box').removeClass('hide');
+            }
+            $(this).addClass('notrans');
+            // 窗口拖至顶部最大化后按还原按钮位置出现问题，这个位置记录似乎有些看不懂，还麻烦调整 -- @tjy
+            // 抱歉, 不小心把x和y坐标写反了(by: User782Tec)
         } else {
-            win.setAttribute('style', `left:${e.clientX - deltaLeft}px;top:${e.clientY - deltaTop}px`);
+            this.setAttribute('style', `left:${cx - deltaLeft}px;top:${cy - deltaTop}px;`);
         }
     }
     titbar.addEventListener('mousedown', (e) => {
-        deltaLeft = e.clientX - win.offsetLeft;
-        deltaTop = e.clientY - win.offsetTop;
-        page.addEventListener('mousemove', win_move);
-    })
-    page.addEventListener('mouseup', () => {
-        page.removeEventListener('mousemove', win_move);
-        if (fil) {
-            maxwin(fil.classList[1]);
-            fil = false;
-            setTimeout(() => {
-                $('#window-fill').removeClass('fill');
-                $('#window-fill').removeClass('top');
-            }, 200);
+        let x = window.getComputedStyle(win, null).getPropertyValue('left').split("px")[0];
+        let y = window.getComputedStyle(win, null).getPropertyValue('top').split("px")[0];
+        if (y != 0) {
+            bfLeft = x;
+            bfTop = y;
         }
+        deltaLeft = e.clientX - x;
+        deltaTop = e.clientY - y;
+        page.onmousemove = win_move.bind(win);
+    })
+    titbar.addEventListener('touchstart', (e) => {
+        let x = window.getComputedStyle(win, null).getPropertyValue('left').split("px")[0];
+        let y = window.getComputedStyle(win, null).getPropertyValue('top').split("px")[0];
+        if (y != 0) {
+            bfLeft = x;
+            bfTop = y;
+        }
+        deltaLeft = e.targetTouches[0].clientX - x;
+        deltaTop = e.targetTouches[0].clientY - y;
+        page.ontouchmove = win_move.bind(win);
     })
 }
+page.addEventListener('mouseup', () => {
+    page.onmousemove = null;
+    if (fil) {
+        maxwin(fil.classList[1], false);
+        setTimeout(() => {
+            $('#window-fill').removeClass('fill');
+            $('#window-fill').removeClass('top');
+        }, 200);
+        $('.window.' + fil.classList[1]).attr('data-pos-x', `${bfLeft}px`);
+        $('.window.' + fil.classList[1]).attr('data-pos-y', `${bfTop}px`);
+        fil = false;
+    }
+});
+page.addEventListener('touchend', () => {
+    page.ontouchmove = null;
+    if (fil) {
+        maxwin(fil.classList[1], false);
+        setTimeout(() => {
+            $('.window.' + fil.classList[1]).attr('data-pos-x', `${bfLeft}px`);
+            $('.window.' + fil.classList[1]).attr('data-pos-y', `${bfTop}px`);
+        }, 200);
+        fil.setAttribute('style', `left:${bfLeft}px;top:${bfTop}px`);
+        fil = false;
+    }
+});
+
+// 记事本选择字体
+const sizes = {
+    '初号': '56',
+    '小初': '48',
+    '一号': '34.7',
+    '小一': '32',
+    '二号': '29.3',
+    '小二': '24',
+    '三号': '21.3',
+    '小三': '20',
+    '四号': '18.7',
+    '小四': '16',
+    '五号': '14',
+    '小五': '12'
+};
+const styles = {
+    '正常': '',
+    '粗体': 'font-weight: bold;',
+    '斜体': 'font-style: italic;',
+    '粗偏斜体': 'font-weight: bold; font-style: italic;'
+}
+const fontvalues = document.querySelectorAll('#win-notepad-font>.row>#win-notepad-font-type>.value-box>.option');
+const sizevalues = document.querySelectorAll('#win-notepad-font>.row>#win-notepad-font-size>.value-box>.option');
+const stylevalues = document.querySelectorAll('#win-notepad-font>.row>#win-notepad-font-style>.value-box>.option');
+const typeinput = document.querySelector('#win-notepad-font>.row>#win-notepad-font-type>input[type=text]');
+const sizeinput = document.querySelector('#win-notepad-font>.row>#win-notepad-font-size>input[type=text]');
+const styleinput = document.querySelector('#win-notepad-font>.row>#win-notepad-font-style>input[type=text]');
+for (const elt of fontvalues) {
+    elt.onclick = function () {
+        typeinput.value = this.innerText;
+        preview();
+    }
+    elt.setAttribute('style', `font-family: ${elt.innerText};`)
+}
+for (const elt of sizevalues) {
+    elt.onclick = function () {
+        sizeinput.value = this.innerText;
+        preview();
+    }
+}
+for (const elt of stylevalues) {
+    elt.onclick = function () {
+        styleinput.value = this.innerText;
+        preview();
+    }
+    elt.setAttribute('style', styles[elt.innerText]);
+}
+sizeinput.addEventListener("keyup", preview);
+typeinput.addEventListener("keyup", preview);
+function commitFont() {
+    var fontsize = 0;
+    var fontstyle;
+    if (!sizeinput.value.match(/^[0-9]*$/)) {
+        if (sizes[sizeinput.value] != undefined) {
+            fontsize = sizes[sizeinput.value];
+        }
+    } else if (sizeinput.value.match(/^[0-9]*$/)) {
+        fontsize = sizeinput.value;
+    }
+    if (fontsize <= 0) {
+        fontsize = 15;
+    }
+    if (styles[styleinput.value] != undefined) {
+        fontstyle = styles[styleinput.value];
+    } else if (styles[styleinput.value] == undefined) {
+        fontstyle = styles['正常'];
+    }
+    if (styles[styleinput.value] != undefined) {
+        fontstyle = styles[styleinput.value];
+    } else if (styles[styleinput.value] == undefined) {
+        fontstyle = styles['正常'];
+    }
+    $('.notepad>#win-notepad>.text-box').attr('style', `font-family: ${typeinput.value} !important; font-size: ${fontsize}px !important; ${fontstyle}`);
+    hidewin('notepad-fonts', 'configs');
+}
+function resetfonts() {
+    typeinput.value = window.getComputedStyle($('.notepad>#win-notepad>.text-box')[0], null).getPropertyValue('font-family').split(', ')[0];
+    var fontsize = window.getComputedStyle($('.notepad>#win-notepad>.text-box')[0], null).getPropertyValue('font-size').split('px')[0];
+    var fontweight = window.getComputedStyle($('.notepad>#win-notepad>.text-box')[0], null).getPropertyValue('font-weight');
+    var fontstyle = window.getComputedStyle($('.notepad>#win-notepad>.text-box')[0], null).getPropertyValue('font-style');
+    if (fontweight == '700' && fontstyle == 'normal') {
+        styleinput.value = '粗体';
+    } else if (fontweight == '400' && fontstyle == 'italic') {
+        styleinput.value = '斜体';
+    } else if (fontweight == '700' && fontstyle == 'italic') {
+        styleinput.value = '粗偏斜体';
+    } else if (fontweight == '400' && fontstyle == 'normal') {
+        styleinput.value = '正常';
+    }
+    for (const [key, value] of Object.entries(sizes)) {
+        if (value == fontsize) {
+            fontsize = key;
+            break;
+        }
+    }
+    sizeinput.value = fontsize;
+}
+function preview() {
+    var fontsize = 0;
+    var fontstyle;
+    if (!sizeinput.value.match(/^[0-9]*$/)) {
+        if (sizes[sizeinput.value] != undefined) {
+            fontsize = sizes[sizeinput.value];
+        }
+    } else if (sizeinput.value.match(/^[0-9]*$/)) {
+        fontsize = sizeinput.value;
+    }
+    if (styles[styleinput.value] != undefined) {
+        fontstyle = styles[styleinput.value];
+    } else if (styles[styleinput.value] == undefined) {
+        fontstyle = styles['正常'];
+    }
+    $('#win-notepad-font>.preview>.preview-box').attr('style', `font-family: ${typeinput.value} !important; font-size: ${fontsize}px !important;${fontstyle}`);
+}
+
 
 // 启动
+let updated = false;
 document.getElementsByTagName('body')[0].onload = function nupd() {
     $('#loadback').addClass('hide'); setTimeout(() => { $('#loadback').css('display', 'none') }, 200);
     if (updated) {
@@ -508,30 +820,26 @@ document.getElementsByTagName('body')[0].onload = function nupd() {
             $('.msg.update').addClass('show');
         }, 1000);
     }
-    aftload = true;
 };
 
 // PWA 应用
-navigator.serviceWorker.register('sw.js', { scope: './' });
+navigator.serviceWorker.register('sw.js', { updateViaCache: 'none', scope: './' });
 
 navigator.serviceWorker.controller.postMessage('update?');
 
 navigator.serviceWorker.addEventListener('message', function (e) {
     if (e.data == 'update') {
         updated = true;
-        $('.msg.update>.main>.tit').html('<i class="bi bi-stars" style="background-image: linear-gradient(100deg, #ad6eca, #3b91d8);-webkit-background-clip: text;-webkit-text-fill-color: transparent;text-shadow:3px 3px 5px var(--sd);filter:saturate(200%) brightness(0.9);"></i> ' + $('#win-about>.cnt.update>div>details:first-child>summary').text());
+        $('.msg.update>.main>.tit').html('<i class="bi bi-stars" style="background-image: linear-gradient(100deg, var(--theme-1), var(--theme-2));-webkit-background-clip: text;-webkit-text-fill-color: transparent;text-shadow:3px 3px 5px var(--sd);filter:saturate(200%) brightness(0.9);"></i> ' + $('#win-about>.cnt.update>div>details:first-child>summary').text());
         $('.msg.update>.main>.cont').html($('#win-about>.cnt.update>div>details:first-child>p').html());
         $('#loadbackupdate').css('display', 'block');
-        if (aftload) {
-            console.log('aftload');
-        }
     }
 });
 
 // 清除cookie
 if (document.cookie != '') {
     document.cookie = 'version=0.0.0;expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-    $('.msg.update>.main>.tit').html('<i class="bi bi-stars" style="background-image: linear-gradient(100deg, #ad6eca, #3b91d8);-webkit-background-clip: text;-webkit-text-fill-color: transparent;text-shadow:3px 3px 5px var(--sd);filter:saturate(200%) brightness(0.9);"></i> ' + $('#win-about>.cnt.update>div>details:first-child>summary').text());
+    $('.msg.update>.main>.tit').html('<i class="bi bi-stars" style="background-image: linear-gradient(100deg, var(--theme-1), var(--theme-2));-webkit-background-clip: text;-webkit-text-fill-color: transparent;text-shadow:3px 3px 5px var(--sd);filter:saturate(200%) brightness(0.9);"></i> ' + $('#win-about>.cnt.update>div>details:first-child>summary').text());
     $('.msg.update>.main>.cont').html($('#win-about>.cnt.update>div>details:first-child>p').html());
     $('#loadbackupdate').css('display', 'block');
     updated = true;
